@@ -11,7 +11,7 @@ module.exports = app => {
         newNote.id = noteArray.length + 1;
         noteArray.push(newNote);
         updateDB();
-        res.status(200).send();
+        res.json(newNote);
     });
     
     function updateDB() {
