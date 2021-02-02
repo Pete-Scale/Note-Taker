@@ -1,16 +1,14 @@
+const fs = require('fs');
 const express = require('express');
 const path = require('path');
 const app = express();
 const PORT = 3000;
 
-let notesArray = require('./db/db.json');
+let noteArray = require('./db/db.json');
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
-app.get('/', (req, res) => {
-    res.send('Note Taker server is working!');
-});
+app.use(express.static('public'));
 
 /**
  * HTML ROUTES
@@ -28,16 +26,26 @@ app.get('*', (req, res) => {
  */
 // show all saved notes
 app.get("/api/notes", (req, res) => {
-    res.json(notesArray);
+    res.json(noteArray);
 });
 
-// app.post("/api/notes", (req, res) => {
-//     const newNote = req.body;
-//     newNote.id = notesArray.length + 1;
-//     noteArray.push(newNote);
-//     console.log(notesArray);
-//     res.status(200).send();
-// });
+app.post("/api/notes", (req, res) => {
+    const newNote = req.body;
+    newNote.id = noteArray.length + 1;
+    noteArray.push(newNote);
+    updateDB();
+    res.status(200).send();
+});
+
+function updateDB() {
+    let jsonNotes = JSON.stringify(noteArray);
+    fs.writeFile('./db/db.json', jsonNotes, err => {
+        if (err) {
+            return console.log(err);
+        }
+        console.log(noteArray);
+    });
+}
 
 
 
