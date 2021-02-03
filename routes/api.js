@@ -1,38 +1,46 @@
 const fs = require('fs');
-const noteArray = require('../db/db.json');
+const path = require('path');
+const { v4: uuidv4 } = require('uuid');
 
 module.exports = app => {
     app.get('/api/notes', (req, res) => {
-        res.json(noteArray);
+        fs.readFile(path.join(__dirname , '../db/db.json'), 'utf8', (err, jsonNotes) => {
+            if (err) throw err;
+            let noteArray = JSON.parse(jsonNotes);
+            res.json(noteArray);
+        });
     });
     
     app.post('/api/notes', (req, res) => {
-        const newNote = req.body;
-        newNote.id = noteArray.length;
-        noteArray.push(newNote);
-        updateDB();
-        res.status(200).send();
+        fs.readFile(path.join(__dirname , '../db/db.json'), 'utf8', (err, jsonNotes) => {
+            if (err) throw err;
+            const newNote = req.body;
+            let noteArray = JSON.parse(jsonNotes);
+            newNote.id = uuidv4();
+            noteArray.push(newNote);
+            updateDB(noteArray);
+            res.json(JSON.stringify(noteArray));
+        });
     });
 
     app.delete('/api/notes/:id', (req, res) => {
-        fs.readFile(noteArray, 'utf8', (err, jsonNotes) => {
+        fs.readFile(path.join(__dirname , '../db/db.json'), 'utf8', (err, jsonNotes) => {
             if (err) throw err;
-            let newNoteArray = JSON.parse(jsonNotes);
-            let noteID = req.params.id 
-            const index = newNoteArray.findIndexOf(note => {
-            return noteID === note.id;
+            let noteArray = JSON.parse(jsonNotes);
+            let noteID = req.params.id
+            const index = noteArray.findIndex(note => {
+            return (noteID === note.id);
             });  
-            newNoteArray.splice(index, 1);
-            updateDB();
+            noteArray.splice(index, 1);
+            updateDB(noteArray);
             res.json(JSON.stringify(noteArray));
         });
     });
     
-    function updateDB() {
-        let jsonNotes = JSON.stringify(noteArray);
-        fs.writeFile('./db/db.json', jsonNotes, err => {
+    function updateDB(notes) {
+        let jsonNotes = JSON.stringify(notes);
+        fs.writeFile(path.join(__dirname , '../db/db.json'), jsonNotes, err => {
             if (err) throw err;
-            console.log(noteArray);
         });
     }
 }
