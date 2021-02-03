@@ -1,6 +1,6 @@
 # Note-Taker
 
-![Note Taker Image](./assets/images/note-taker.png)
+![Note Taker Image](./public/assets/images/note-taker.png)
 
 <br>
 
